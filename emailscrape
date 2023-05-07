@@ -1,0 +1,34 @@
+import re
+import requests
+from bs4 import BeautifulSoup
+
+def search_website(url, search_type):
+    # Send a GET request to the specified URL
+    response = requests.get(url)
+
+    # Parse the HTML content of the page using BeautifulSoup
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    # Search for email addresses or job functions in the page content
+    if search_type == "email":
+        pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+        results = re.findall(pattern, str(soup))
+    elif search_type == "job":
+        pattern = r"(?i)(?<=<h2>).*(?=</h2>)"
+        results = re.findall(pattern, str(soup))
+    else:
+        print("Invalid search type specified.")
+        return []
+
+    # Remove duplicates from the results list
+    results = list(set(results))
+
+    return results
+
+# Example usage: search for email addresses on a website
+results = search_website("https://example.com", "email")
+print("Email addresses found:", results)
+
+# Example usage: search for job functions on a website
+results = search_website("https://example.com/careers", "job")
+print("Job functions found:", results)
